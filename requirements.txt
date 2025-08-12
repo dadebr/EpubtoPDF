@@ -1,0 +1,25 @@
+# EPUB to PDF Converter Requirements
+
+# Core GUI framework
+tkinter  # Built-in with Python, but listing for documentation
+
+# EPUB processing
+ebooklib==0.18
+
+# PDF generation
+reportlab==4.0.7
+
+# HTML/XML parsing and rendering
+weasyprint==62.3
+
+# Alternative PDF generation (lighter weight)
+fpdf2==2.7.8
+
+# File handling utilities
+pathlib  # Built-in with Python 3.4+
+
+# Optional: Progress indication
+tqdm==4.66.1
+
+# Optional: Configuration management
+configparser  # Built-in with Python
