@@ -1,25 +1,46 @@
 #!/usr/bin/env python3
 """Main entry point for EPUB to PDF Converter application.
-
 This module provides both command-line and GUI interfaces for converting
 EPUB files to PDF format.
 """
-
 import sys
 import argparse
 from pathlib import Path
-
 from .converter import EpubToPdfConverter, ConversionError
-from .gui import EpubToPdfGUI
 
+# Check for tkinter availability early
+def check_tkinter_availability():
+    """Check if tkinter is available and show friendly error if not."""
+    try:
+        import tkinter
+        return True
+    except ImportError:
+        print("\n" + "="*60)
+        print("  ERRO: Tkinter não está disponível")
+        print("  ERROR: Tkinter is not available")
+        print("="*60)
+        print("\nO Tkinter é necessário para a interface gráfica.")
+        print("Tkinter is required for the graphical interface.\n")
+        print("Para resolver este problema / To solve this issue:")
+        print("\n• Ubuntu/Debian:")
+        print("  sudo apt-get install python3-tk")
+        print("\n• Fedora/CentOS/RHEL:")
+        print("  sudo dnf install tkinter")
+        print("  # ou / or: sudo yum install tkinter")
+        print("\n• macOS:")
+        print("  brew install python-tk")
+        print("\n• Windows:")
+        print("  O Tkinter geralmente já vem instalado")
+        print("  Tkinter is usually already installed")
+        print("\n" + "="*60 + "\n")
+        return False
 
 def create_parser():
     """Create command line argument parser."""
     parser = argparse.ArgumentParser(
         description="Convert EPUB files to PDF format",
         formatter_class=argparse.RawDescriptionHelpFormatter,
-        epilog="""
-Examples:
+        epilog="""Examples:
   %(prog)s book.epub                    # Convert to book.pdf (GUI mode)
   %(prog)s book.epub -o output.pdf      # Convert with custom output name
   %(prog)s book.epub --cli              # Command-line mode
@@ -57,7 +78,6 @@ Examples:
     )
     
     return parser
-
 
 def cli_convert(input_file: str, output_file: str = None) -> bool:
     """Perform conversion using command-line interface."""
@@ -110,7 +130,6 @@ def cli_convert(input_file: str, output_file: str = None) -> bool:
         print(f"Unexpected error: {e}")
         return False
 
-
 def main():
     """Main entry point."""
     parser = create_parser()
@@ -118,7 +137,10 @@ def main():
     
     # If no arguments provided, launch GUI
     if len(sys.argv) == 1:
+        if not check_tkinter_availability():
+            sys.exit(1)
         try:
+            from .gui import EpubToPdfGUI
             app = EpubToPdfGUI()
             app.run()
         except Exception as e:
@@ -128,7 +150,10 @@ def main():
     
     # If --gui flag is provided, launch GUI
     if args.gui:
+        if not check_tkinter_availability():
+            sys.exit(1)
         try:
+            from .gui import EpubToPdfGUI
             app = EpubToPdfGUI()
             app.run()
         except Exception as e:
@@ -138,7 +163,10 @@ def main():
     
     # If input file is provided but no --cli flag, launch GUI with file pre-loaded
     if args.input_file and not args.cli:
+        if not check_tkinter_availability():
+            sys.exit(1)
         try:
+            from .gui import EpubToPdfGUI
             app = EpubToPdfGUI()
             # Pre-load the file (would need to modify GUI class to accept this)
             app.epub_path.set(args.input_file)
@@ -157,7 +185,6 @@ def main():
     else:
         parser.print_help()
         sys.exit(1)
-
 
 if __name__ == '__main__':
     main()
