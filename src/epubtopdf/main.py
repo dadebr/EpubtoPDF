@@ -44,6 +44,7 @@ def create_parser():
   %(prog)s book.epub                    # Convert to book.pdf (GUI mode)
   %(prog)s book.epub -o output.pdf      # Convert with custom output name
   %(prog)s book.epub --cli              # Command-line mode
+  %(prog)s book.epub --tolerant         # Convert with tolerant mode (skips malformed HTML)
   %(prog)s --gui                        # Launch GUI without file
 """
     )
@@ -72,6 +73,12 @@ def create_parser():
     )
     
     parser.add_argument(
+        '--tolerant',
+        action='store_true',
+        help='Enable tolerant mode: continue conversion even when encountering malformed HTML or parsing errors'
+    )
+    
+    parser.add_argument(
         '--version',
         action='version',
         version='EPUB to PDF Converter v1.0.0'
@@ -79,7 +86,7 @@ def create_parser():
     
     return parser
 
-def cli_convert(input_file: str, output_file: str = None) -> bool:
+def cli_convert(input_file: str, output_file: str = None, tolerant: bool = False) -> bool:
     """Perform conversion using command-line interface."""
     try:
         # Validate input file
@@ -102,9 +109,11 @@ def cli_convert(input_file: str, output_file: str = None) -> bool:
         output_path.parent.mkdir(parents=True, exist_ok=True)
         
         print(f"Converting '{input_file}' to '{output_file}'...")
+        if tolerant:
+            print("Using tolerant mode: will skip malformed HTML elements and continue conversion.")
         
         # Create converter
-        converter = EpubToPdfConverter()
+        converter = EpubToPdfConverter(tolerant_mode=tolerant)
         
         # Set up progress callback
         def progress_callback(progress):
@@ -180,7 +189,7 @@ def main():
     
     # Command-line mode
     if args.input_file:
-        success = cli_convert(args.input_file, args.output)
+        success = cli_convert(args.input_file, args.output, args.tolerant)
         sys.exit(0 if success else 1)
     else:
         parser.print_help()
